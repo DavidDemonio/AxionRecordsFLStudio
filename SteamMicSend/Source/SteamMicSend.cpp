@@ -4,6 +4,7 @@
 #include "miniaudio.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstring>
 #include <new>
@@ -82,7 +83,7 @@ tresult PLUGIN_API SteamMicSend::setBusArrangements(SpeakerArrangement* inputs,
                                                        SpeakerArrangement* outputs,
                                                        int32 numOuts)
 {
-    if (numIns != 1 || numOuts != 1)
+    if (numIns != 1 || numOuts != 1 || inputs == nullptr || outputs == nullptr)
         return kResultFalse;
 
     const auto inChannels = SpeakerArr::getChannelCount(inputs[0]);
@@ -91,12 +92,7 @@ tresult PLUGIN_API SteamMicSend::setBusArrangements(SpeakerArrangement* inputs,
     if (inChannels != outChannels || (inChannels != 1 && inChannels != 2))
         return kResultFalse;
 
-    if (auto* inBus = getAudioInput(0))
-        inBus->setArrangement(inputs[0]);
-    if (auto* outBus = getAudioOutput(0))
-        outBus->setArrangement(outputs[0]);
-
-    return kResultTrue;
+    return SingleComponentEffect::setBusArrangements(inputs, numIns, outputs, numOuts);
 }
 
 tresult PLUGIN_API SteamMicSend::canProcessSampleSize(int32 symbolicSampleSize)
